@@ -9,8 +9,11 @@ import (
 
 func main() {
 	m := pizzameeting.Meeting{}
-	m.CombinatorMaker = combinator.NewRecursiveCombinatorMaker()
 	m.Pizzeria = pizzerias.AlTaglioBCN
+	m.Solver = pizzameeting.PPPSolver{
+		CombinatorMaker: combinator.NewRecursiveCombinatorMaker(),
+		PizzasPerPerson: 0.5,
+	}
 
 	roobre := &pizzameeting.Person{}
 	roobre.Score("Margherita", 10)
