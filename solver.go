@@ -94,8 +94,11 @@ func (ps PPPSolver) Solve(attendees []Attendee, restaurantMenu []Pizza) Solution
 	for _, vm := range accpetedMenus {
 		solution.Acceptable = append(solution.Acceptable, vm.menu)
 		if vm.score >= max {
+			if vm.score > max {
+				solution.Optimal = nil
+				max = vm.score
+			}
 			solution.Optimal = append(solution.Optimal, vm.menu)
-			max = vm.score
 		}
 	}
 
