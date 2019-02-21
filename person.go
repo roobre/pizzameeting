@@ -14,6 +14,7 @@ type Attendee interface {
 type Pizza string
 
 type Person struct {
+	Name   string
 	scores map[Pizza]int
 }
 
