@@ -1,29 +1,18 @@
 package pizzameeting
 
 import (
-	"crypto/rand"
-	"encoding/hex"
 	"encoding/json"
 	"log"
 	"time"
 )
 
 type Meeting struct {
-	ID        string
+	Identifier
 	Date      time.Time
 	Topic     string
 	Pizzeria  Pizzeria
 	Solver    Solver
 	Attendees []Attendee
-}
-
-func NewMeeting() *Meeting {
-	id := make([]byte, 12)
-	rand.Read(id)
-
-	return &Meeting{
-		ID: hex.EncodeToString(id),
-	}
 }
 
 func (m *Meeting) Invite(attendees ...Attendee) {
@@ -50,13 +39,13 @@ func (m *Meeting) Menu() []Pizza {
 
 func (m *Meeting) MarshalJSON() ([]byte, error) {
 	var jsonmeeting struct {
-		ID        string     `json:"id"`
+		Identifier
 		Date      time.Time  `json:"date"`
 		Topic     string     `json:"topic"`
 		Attendees []Attendee `json:"attendees"`
 		Menu      []Pizza    `json:"menu"`
 	}
-	jsonmeeting.ID = m.ID
+	jsonmeeting.Identifier = m.Identifier
 	jsonmeeting.Attendees = m.Attendees
 	jsonmeeting.Date = m.Date
 	jsonmeeting.Menu = m.Menu()
