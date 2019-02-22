@@ -1,11 +1,13 @@
 package pizzameeting
 
 import (
+	"log"
 	"math"
 	"roob.re/pizzameeting/combinator"
 	"runtime"
 	"sort"
 	"sync"
+	"time"
 )
 
 type Solver interface {
@@ -34,6 +36,7 @@ func (ps PPPSolver) Use(maker combinator.CombinatorMaker) {
 }
 
 func (ps PPPSolver) Solve(attendees []Attendee, restaurantMenu []Pizza) Solution {
+	t0 := time.Now()
 	ps.attendees = attendees
 
 	generatedMenuChan := make(chan []Pizza, 4)
@@ -99,6 +102,10 @@ func (ps PPPSolver) Solve(attendees []Attendee, restaurantMenu []Pizza) Solution
 		}
 	}
 
+	dur := time.Since(t0)
+	if dur > 500*time.Millisecond {
+		log.Printf("Solver took %v", dur)
+	}
 	return solution
 }
 
