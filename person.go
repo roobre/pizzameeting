@@ -1,6 +1,8 @@
 package pizzameeting
 
-import "math"
+import (
+	"math"
+)
 
 const minScore = 10
 const maxScore = 2*minScore - 1
@@ -14,6 +16,7 @@ type Attendee interface {
 type Pizza string
 
 type Person struct {
+	Id     Identifier `json:"-"`
 	Name   string
 	scores map[Pizza]int
 }
