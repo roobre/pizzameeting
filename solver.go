@@ -46,7 +46,7 @@ func (ps PPPSolver) Solve(attendees []Attendee, restaurantMenu []Pizza) Solution
 
 	workerWg := &sync.WaitGroup{}
 	// Spin up workers
-	for i := 0; i < runtime.NumCPU(); i++ {
+	for i := 0; i < runtime.NumCPU()*2; i++ {
 		workerWg.Add(1)
 		go ps.worker(generatedMenuChan, acceptedMenuChan, workerWg)
 	}
