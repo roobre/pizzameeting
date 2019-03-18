@@ -1,5 +1,7 @@
 package combinator
 
+import "math/big"
+
 type Combinator interface {
 	Next() []int
 	Len() int
@@ -33,15 +35,7 @@ func NewRecursiveCombinatorMaker() func(nSamples, maxSample int) Combinator {
 }
 
 func (rc *RecursiveCombinator) Len() int {
-	total := 1
-	for i := rc.maxSample + len(rc.current) - 1; i >= rc.maxSample; i-- {
-		total *= i
-	}
-	for i := len(rc.current); i > 1; i-- {
-		total /= i
-	}
-
-	return total
+	return int(big.NewInt(0).Binomial(int64(rc.maxSample+len(rc.current)-1), int64(len(rc.current))).Int64())
 }
 
 func (rc *RecursiveCombinator) Next() []int {
