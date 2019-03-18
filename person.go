@@ -30,16 +30,16 @@ func (p *Person) Score(pi Pizza, score int) {
 }
 
 func (p *Person) Evaluate(menu []Pizza) int {
-	var score float64 = 0
-	repeatPenalties := make(map[Pizza]float64)
+	var score float32 = 0
+	repeatPenalties := make(map[Pizza]float32, 4)
 	for _, pizza := range menu {
-		score += float64(p.scores[pizza]) * (repeatPenalties[pizza] + 1)
+		score += float32(p.scores[pizza]) * (repeatPenalties[pizza] + 1)
 		repeatPenalties[pizza] = -penaltyFactor
 	}
 
 	if len(p.scores) >= 2 {
-		return int(math.Round(score - minScore*(1+penaltyFactor)))
+		return int(math.Round(float64(score - minScore*(1+penaltyFactor))))
 	} else {
-		return int(math.Round(score)) - (minScore - 1)
+		return int(math.Round(float64(score))) - (minScore - 1)
 	}
 }
