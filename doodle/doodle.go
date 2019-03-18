@@ -35,6 +35,11 @@ type Participant string
 
 func ParseDoodle(url string) (*Doodle, error) {
 	id := regexp.MustCompile(`\w{16,}`).FindString(url)
+
+	if len(id) < 16 {
+		return nil, errors.New("doodle id has invalid format")
+	}
+
 	resp, err := http.Get(apiBase + id)
 	if err != nil {
 		return nil, err
