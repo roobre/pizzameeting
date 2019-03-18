@@ -1,75 +1,58 @@
 package main
 
 import (
+	"flag"
 	"fmt"
+	"log"
+	"os"
 	"roob.re/pizzameeting"
 	"roob.re/pizzameeting/combinator"
+	"roob.re/pizzameeting/doodle"
 	"roob.re/pizzameeting/pizzerias"
 )
 
 func main() {
-	m := pizzameeting.Meeting{}
-	m.Pizzeria = pizzerias.AlTaglioBCN
-	m.Solver = pizzameeting.PPPSolver{
-		CombinatorMaker: combinator.NewRecursiveCombinatorMaker(),
-		PizzasPerPerson: 0.5,
+
+	doodleId := flag.String("doodle", "", "Doodle URL or ID")
+	ppp := flag.Float64("pizzas-per-person", 0.5, "Pizzas per person")
+	flag.Parse()
+
+	if len(*doodleId) < 16 {
+		flag.PrintDefaults()
+		os.Exit(0)
 	}
 
-	roobre := &pizzameeting.Person{}
-	roobre.Score("Margherita", 10)
-	roobre.Score("Diavola", 11)
-	roobre.Score("Prosciutto", 11)
+	meeting := pizzameeting.Meeting{}
 
-	matteo := &pizzameeting.Person{}
-	matteo.Score("Diavola", 10)
-	matteo.Score("Prosciutto", 11)
-	matteo.Score("Margherita", 11)
+	log.Println("Fetching doodle info...")
+	dood, err := doodle.ParseDoodle(*doodleId)
+	if err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "Error fetching doodle information: %v", err)
+		os.Exit(1)
+	}
 
-	mikel := &pizzameeting.Person{}
-	mikel.Score("Coppata", 10)
-	//mikel.Score("Prosciutto", 10)
-	//mikel.Score("4Fromatges", 11)
+	meeting.Pizzeria = pizzerias.FromDoodle(dood)
+	meeting.Solver = pizzameeting.PPPSolver{
+		CombinatorMaker: combinator.NewRecursiveCombinatorMaker(),
+		PizzasPerPerson: *ppp,
+	}
 
-	xavi := &pizzameeting.Person{}
-	xavi.Score("Parmesana", 10)
-	xavi.Score("4Fromatges", 11)
-	xavi.Score("Margherita", 11)
-	xavi.Score("Prosciutto", 11)
+	for participant, votes := range dood.Results() {
+		p := &pizzameeting.Person{Name: string(participant)}
+		for pizza, score := range votes {
+			if score != 0 {
+				p.Score(pizzameeting.Pizza(pizza), 10+((score-1)*5))
+			}
+		}
 
-	fran := &pizzameeting.Person{}
-	fran.Score("Vegetariana", 10)
-	fran.Score("Margherita", 10)
-	fran.Score("Parmesana", 10)
-	fran.Score("4Fromatges", 11)
+		meeting.Invite(p)
+	}
 
-	jaume := &pizzameeting.Person{}
-	jaume.Score("Prosciutto", 10)
-	jaume.Score("Parmesana", 10)
-	jaume.Score("Vegetariana", 10)
-	jaume.Score("4Fromatges", 11)
+	log.Println("Computing menu...")
+	menu := meeting.Menu()
+	_ = os.Stdout.Sync()
 
-	leonidas := &pizzameeting.Person{}
-	leonidas.Score("Parmesana", 10)
-	leonidas.Score("Prosciutto", 10)
-	leonidas.Score("Margherita", 10)
-	leonidas.Score("4Fromatges", 11)
-
-	sergi := &pizzameeting.Person{}
-	sergi.Score("Parmesana", 10)
-	sergi.Score("Vegetariana", 10)
-	sergi.Score("4Fromatges", 11)
-
-	jordi := &pizzameeting.Person{}
-	jordi.Score("Parmesana", 10)
-	jordi.Score("Vegetariana", 10)
-	jordi.Score("Huevos", 11)
-
-	hamid := &pizzameeting.Person{}
-	hamid.Score("Parmesana", 10)
-	hamid.Score("Prosciutto", 10)
-	hamid.Score("Margherita", 10)
-	hamid.Score("4Fromatges", 11)
-
-	m.Invite(roobre, matteo, mikel, xavi, fran, jaume, leonidas, sergi, jordi, hamid)
-	fmt.Println(m.Menu())
+	for _, pizza := range menu {
+		fmt.Println(pizza)
+	}
 }
