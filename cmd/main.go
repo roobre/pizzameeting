@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/olekukonko/tablewriter"
 	"log"
 	"os"
 	"roob.re/pizzameeting"
@@ -41,18 +42,25 @@ func main() {
 		p := &pizzameeting.Person{Name: string(participant)}
 		for pizza, score := range votes {
 			if score != 0 {
-				p.Score(pizzameeting.Pizza(pizza), 10+((score-1)*5))
+				p.Score(pizzameeting.Pizza(pizza), 10+((score-1)*6))
 			}
 		}
 
 		meeting.Invite(p)
 	}
 
+	out := make(map[pizzameeting.Pizza]int)
 	log.Println("Computing menu...")
-	menu := meeting.Menu()
-	_ = os.Stdout.Sync()
-
-	for _, pizza := range menu {
-		fmt.Println(pizza)
+	for _, pizza := range meeting.Menu() {
+		out[pizza]++
 	}
+
+	tbw := tablewriter.NewWriter(os.Stdout)
+	tbw.SetHeader([]string{"Pizza", "#"})
+
+	for pizza, number := range out {
+		tbw.Append([]string{string(pizza), fmt.Sprint(number)})
+	}
+
+	tbw.Render()
 }
