@@ -68,9 +68,13 @@ func (ps PPPSolver) Solve(attendees []Attendee, restaurantMenu []Pizza) Solution
 	nPizzas := int(math.Ceil(float64(len(ps.attendees)) * ppp))
 
 	comb := ps.CombinatorMaker(nPizzas, len(restaurantMenu))
+	comblen := comb.Len()
 
-	for i := comb.Len(); i > 0; i-- {
+	log.Printf("Finding a menu of %d pizzas between all %d possible menus", nPizzas, comblen)
+
+	for i := comblen; i > 0; i-- {
 		generatedMenu := make([]Pizza, nPizzas)
+
 		for menuIndex, pizzaIndex := range comb.Next() {
 			generatedMenu[menuIndex] = restaurantMenu[pizzaIndex]
 		}
