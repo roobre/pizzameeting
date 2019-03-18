@@ -7,7 +7,7 @@ import (
 const minScore = 10
 const maxScore = 2*minScore - 1
 
-const penaltyFactor = 0.5
+const repeatPenaltyFactor = 0.66 // Score will be multiplied by 1-repeatPenaltyFactor. The higher the factor, the more the penalty
 
 type Attendee interface {
 	Evaluate([]Pizza) int
@@ -34,11 +34,11 @@ func (p *Person) Evaluate(menu []Pizza) int {
 	repeatPenalties := make(map[Pizza]float32, 4)
 	for _, pizza := range menu {
 		score += float32(p.scores[pizza]) * (repeatPenalties[pizza] + 1)
-		repeatPenalties[pizza] = -penaltyFactor
+		repeatPenalties[pizza] = -repeatPenaltyFactor
 	}
 
 	if len(p.scores) >= 2 {
-		return int(math.Round(float64(score - minScore*(1+penaltyFactor))))
+		return int(math.Round(float64(score - minScore*(1+repeatPenaltyFactor))))
 	} else {
 		return int(math.Round(float64(score))) - (minScore - 1)
 	}
