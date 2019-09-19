@@ -10,13 +10,24 @@ import (
 	"roob.re/pizzameeting/combinator"
 	"roob.re/pizzameeting/doodle"
 	"roob.re/pizzameeting/pizzerias"
+	"runtime/pprof"
 )
 
 func main() {
 
 	doodleId := flag.String("doodle", "", "Doodle URL or ID")
 	ppp := flag.Float64("pizzas-per-person", 0.5, "Pizzas per person")
+	prof := flag.String("prof", "", "Write profile output to this file")
 	flag.Parse()
+
+	if *prof != "" {
+		f, err := os.Create(*prof)
+		if err != nil {
+			log.Fatal(err)
+		}
+		pprof.StartCPUProfile(f)
+		defer pprof.StopCPUProfile()
+	}
 
 	if len(*doodleId) < 16 {
 		flag.PrintDefaults()
@@ -34,7 +45,7 @@ func main() {
 
 	meeting.Pizzeria = pizzerias.FromDoodle(dood)
 	meeting.Solver = pizzameeting.PPPSolver{
-		CombinatorMaker: combinator.NewRecursiveCombinatorMaker(),
+		CombinatorMaker: combinator.RecursiveCombinatorMaker,
 		PizzasPerPerson: *ppp,
 	}
 
