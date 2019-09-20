@@ -7,7 +7,7 @@ import (
 const minScore = 10
 const maxScore = 2*minScore - 1
 
-const repeatPenaltyFactor = 0.60 // Score will be multiplied by 1-repeatPenaltyFactor. The higher the factor, the more the penalty
+const repeatPenaltyFactor = 0.66 // Each repetition will multiply the score by this value. The closer to one, the smaller the penalty.
 
 type Attendee interface {
 	Evaluate([]Pizza) int
@@ -50,32 +50,29 @@ func (p *Person) pizzaScore(pizza Pizza) int {
 }
 
 func (p *Person) Evaluate(menu []Pizza) int {
-	var score float32 = 0
+	score := 0.0
 	//repeatPenalties := make(map[Pizza]float32, len(menu))
 	penalized := make([]Pizza, 0, len(menu))
 
 	for _, pizza := range menu {
-		// Accessing maps is cheap, appending is not
-		score += float32(p.scores[pizza]) * penalty(pizza, penalized)
-		//score += float32(p.scores[pizza]) * (repeatPenalties[pizza] + 1)
-		//score += float32(p.pizzaScore(pizza)) * (repeatPenalties[pizza] + 1)
+		score += float64(p.scores[pizza]) * penalty(pizza, penalized)
 		penalized = append(penalized, pizza)
-		//repeatPenalties[pizza] = -repeatPenaltyFactor
 	}
 
 	if len(p.scores) >= 2 {
-		return int(math.Round(float64(score - minScore*(1+repeatPenaltyFactor))))
+		return int(math.Round(score - minScore*(1+repeatPenaltyFactor)))
 	} else {
-		return int(math.Round(float64(score))) - (minScore - 1)
+		return int(math.Round(score)) - (minScore - 1)
 	}
 }
 
-func penalty(pizza Pizza, penalties []Pizza) float32 {
+func penalty(pizza Pizza, penalties []Pizza) float64 {
+	factor := 1.0
 	for _, penalizedPizza := range penalties {
 		if penalizedPizza == pizza {
-			return 1 - repeatPenaltyFactor
+			factor *= repeatPenaltyFactor
 		}
 	}
 
-	return 1
+	return factor
 }
